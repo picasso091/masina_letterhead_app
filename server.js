@@ -8,6 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+app.set("trust proxy", 1);
 app.use(express.urlencoded({ extended: true }));
 
 // Serve logo + fonts
@@ -65,7 +66,8 @@ app.post("/generate", async (req, res) => {
   const templatePath = path.join(__dirname, "views/template.html");
   const template = fs.readFileSync(templatePath, "utf8");
 
-  const base = "http://127.0.0.1:3000";
+  // const base = "http://127.0.0.1:3000";
+  const base = `${req.protocol}://${req.get("host")}`;
   const language = req.body.language || "nepali";
 
   const DATE_LABEL = language === "english" ? "Date:" : "मिति:-";
@@ -143,6 +145,6 @@ app.post("/generate", async (req, res) => {
   }
 });
 
-app.listen(3000, () => {
-  console.log("🚀 Server running at http://127.0.0.1:3000");
+app.listen(3000, "0.0.0.0", () => {
+  console.log(`🚀 Server running on port 3000`);
 });
