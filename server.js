@@ -10,11 +10,14 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.use(express.urlencoded({ extended: true }));
 
-// Serve assets (logo + fonts)
+// Serve logo + fonts
 app.use("/assets", express.static(path.join(__dirname, "assets")));
 
-// Serve nepali date picker dist from node_modules (FILES ARE DIRECTLY IN dist/)
-const ndpDistPath = path.join(__dirname, "node_modules/@sajanm/nepali-date-picker/dist");
+// Serve nepali datepicker dist
+const ndpDistPath = path.join(
+  __dirname,
+  "node_modules/@sajanm/nepali-date-picker/dist",
+);
 app.use("/vendor/nepali-date-picker", express.static(ndpDistPath));
 
 function pad2(n) {
@@ -33,22 +36,22 @@ function escapeHtml(s = "") {
     .replaceAll("'", "&#039;");
 }
 
-// Read installed version to load the correct vX.Y.Z filenames
 function getNdpVersion() {
-  const pkgPath = path.join(__dirname, "node_modules/@sajanm/nepali-date-picker/package.json");
+  const pkgPath = path.join(
+    __dirname,
+    "node_modules/@sajanm/nepali-date-picker/package.json",
+  );
   const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
-  return pkg.version; // e.g. "5.0.6"
+  return pkg.version; // "5.0.6"
 }
 
+// Form page
 app.get("/", (req, res) => {
   const formPath = path.join(__dirname, "views/form.html");
   let html = fs.readFileSync(formPath, "utf8");
 
   const ndpVersion = getNdpVersion();
 
-  // Build paths exactly like README:
-  // /v5/nepali.datepicker/js/nepali.datepicker.v5.0.6.min.js
-  // /v5/nepali.datepicker/css/nepali.datepicker.v5.0.6.min.css
   html = html
     .replaceAll("{{TODAY_AD_INPUT}}", todayADInput())
     .replaceAll("{{NDP_VERSION}}", ndpVersion);
@@ -57,6 +60,7 @@ app.get("/", (req, res) => {
   res.send(html);
 });
 
+// Generate PDF
 app.post("/generate", async (req, res) => {
   const templatePath = path.join(__dirname, "views/template.html");
   const template = fs.readFileSync(templatePath, "utf8");
@@ -66,7 +70,7 @@ app.post("/generate", async (req, res) => {
 
   const DATE_LABEL = language === "english" ? "Date:" : "मिति:-";
   const SUBJECT_LABEL = language === "english" ? "Subject:" : "विषय:-";
-  const SALUTATION = language === "english" ? "Dear" : "श्रीमान्";
+  const SALUTATION = language === "english" ? "Dear" : "श्री";
 
   const data = {
     LOGO_PATH: `${base}/assets/logo.png`,
@@ -84,20 +88,26 @@ app.post("/generate", async (req, res) => {
     SUBJECT: escapeHtml(req.body.subject || ""),
     BODY_TEXT: escapeHtml(req.body.body || ""),
     SIGN_NAME: escapeHtml(req.body.signname || ""),
-    SIGN_TITLE: escapeHtml(req.body.signtitle || "")
+    SIGN_TITLE: escapeHtml(req.body.signtitle || ""),
   };
 
   const html = template.replace(/{{(\w+)}}/g, (_, key) => data[key] || "");
 
   const browser = await puppeteer.launch({
     headless: "new",
-    args: ["--no-sandbox", "--disable-setuid-sandbox"]
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
 
   try {
+    // before: const page = await browser.newPage();
     const page = await browser.newPage();
+
+    // Force a stable A4-ish viewport so Puppeteer doesn't "reflow" differently
+    await page.setViewport({ width: 794, height: 1123, deviceScaleFactor: 1 }); // ~A4 @96dpi
+
     await page.setContent(html, { waitUntil: "domcontentloaded" });
 
+    // Wait for images to load (keep your existing block)
     await page.evaluate(async () => {
       const imgs = Array.from(document.images);
       await Promise.all(
@@ -107,17 +117,20 @@ app.post("/generate", async (req, res) => {
             : new Promise((resolve, reject) => {
                 img.addEventListener("load", resolve);
                 img.addEventListener("error", reject);
-              })
-        )
+              }),
+        ),
       );
     });
 
     const pdfBytes = await page.pdf({
       format: "A4",
-      printBackground: true
+      printBackground: true,
+      preferCSSPageSize: true,
+      margin: { top: "0mm", right: "0mm", bottom: "0mm", left: "0mm" },
     });
 
     const pdfBuffer = Buffer.from(pdfBytes);
+
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", 'attachment; filename="notice.pdf"');
     res.setHeader("Content-Length", pdfBuffer.length);

@@ -1,254 +1,281 @@
 <!doctype html>
 <html>
-<head>
-<meta charset="utf-8" />
-<title>Masina Letterhead</title>
+  <head>
+    <meta charset="utf-8" />
+    <title>Masina Letterhead</title>
 
-<style>
-  @font-face {
-    font-family: "NotoDevanagari";
-    src: url("{{DEV_FONT_REG}}") format("truetype");
-    font-weight: 400;
-  }
-  @font-face {
-    font-family: "NotoDevanagari";
-    src: url("{{DEV_FONT_BOLD}}") format("truetype");
-    font-weight: 700;
-  }
+    <style>
+      @font-face {
+        font-family: "NotoDevanagari";
+        src: url("{{DEV_FONT_REG}}") format("truetype");
+        font-weight: 400;
+      }
+      @font-face {
+        font-family: "NotoDevanagari";
+        src: url("{{DEV_FONT_BOLD}}") format("truetype");
+        font-weight: 700;
+      }
 
-  @page { size: A4; margin: 0; }
-  html, body { margin: 0; padding: 0; }
+      /* Use page margins instead of a fixed 210mm container */
+      @page {
+        size: A4;
+        margin: 14mm 16mm 16mm 16mm; /* top right bottom left */
+      }
 
-  body {
-    font-family: "NotoDevanagari", Arial, Helvetica, sans-serif;
-    color: #111;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+      }
 
-  .page {
-    position: relative;
-    width: 210mm;
-    height: 297mm;
-    padding: 14mm 16mm 16mm 16mm; /* reduced top/bottom padding */
-    box-sizing: border-box;
-    overflow: hidden;
-  }
+      body {
+        font-family: "NotoDevanagari", Arial, Helvetica, sans-serif;
+        width: 210mm;
+        margin: 0 auto;
+        color: #111;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
 
-  .header {
-    position: absolute;
-    top: 14mm;
-    left: 16mm;
-    right: 16mm;
-    height: 50mm;
-  }
+      /* Header/Footer fixed in the printable area */
+      header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 50mm;
+      }
 
-  .footer {
-    position: absolute;
-    bottom: 16mm;
-    left: 16mm;
-    right: 16mm;
-    height: 18mm;
-    font-size: 10.5pt;
-    color: #1b2a7a;
-  }
+      footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 18mm;
+        font-size: 10.5pt;
+        color: #1b2a7a;
+      }
 
-  .content {
-    position: absolute;
-    left: 16mm;
-    right: 16mm;
-    top: 68mm;
-    bottom: 40mm;
-    overflow: hidden;
-  }
+      /* Main content sits between header and footer */
+      main {
+        position: relative;
+        padding-top: 54mm; /* header height + a bit of breathing space */
+        padding-bottom: 24mm; /* footer height + spacing */
+      }
 
-  .watermark {
-    position: absolute;
-    top: 52%;
-    left: 50%;
-    width: 110mm;
-    transform: translate(-50%, -50%);
-    opacity: 0.07;
-    z-index: 0;
-    pointer-events: none;
-  }
-  .watermark img { width: 100%; height: auto; }
+      /* Watermark centered on the page */
+      .watermark {
+        position: fixed;
+        left: 50%;
+        top: 52%;
+        transform: translate(-50%, -50%);
+        width: 110mm;
+        opacity: 0.07;
+        z-index: 0;
+        pointer-events: none;
+      }
+      .watermark img {
+        width: 100%;
+        height: auto;
+      }
 
-  .header, .footer, .content { z-index: 1; position: relative; }
+      header,
+      footer,
+      main {
+        z-index: 1;
+      }
 
-  .top-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 12mm;
-  }
+      /* Header layout */
+      .top-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12mm;
+      }
 
-  .brand {
-    display: flex;
-    gap: 8mm;
-    align-items: center;
-  }
+      .brand {
+        display: flex;
+        gap: 8mm;
+        align-items: center;
+      }
 
-  .brand img.logo { width: 26mm; height: auto; object-fit: contain; }
+      .brand img.logo {
+        width: 26mm;
+        height: auto;
+        object-fit: contain;
+      }
 
-  .brand .name {
-    font-size: 18pt;
-    font-weight: 700;
-    color: #2a2e7a;
-    line-height: 1.12;
-    letter-spacing: 0.2px;
-  }
+      .brand .name {
+        font-size: 18pt;
+        font-weight: 700;
+        color: #2a2e7a;
+        line-height: 1.12;
+        letter-spacing: 0.2px;
+      }
 
-  .contacts {
-    text-align: right;
-    font-size: 11pt;
-    color: #2a2e7a;
-    line-height: 1.4;
-    white-space: nowrap;
-  }
+      .contacts {
+        text-align: right;
+        font-size: 11pt;
+        color: #2a2e7a;
+        line-height: 1.4;
+        white-space: nowrap;
+      }
 
-  .divider, .footer-divider {
-    height: 1.5mm; /* thinner lines */
-    display: flex;
-    width: 100%;
-  }
-  .divider { margin-top: 8mm; }
-  .footer-divider { margin-bottom: 5mm; }
+      .divider,
+      .footer-divider {
+        height: 1.5mm;
+        display: flex;
+        width: 100%;
+      }
+      .divider {
+        margin-top: 8mm;
+      }
+      .footer-divider {
+        margin-bottom: 5mm;
+      }
 
-  .red { width: 35%; background: #e00000; }
-  .blue { width: 65%; background: #24308a; }
+      .red {
+        width: 35%;
+        background: #e00000;
+      }
+      .blue {
+        width: 65%;
+        background: #24308a;
+      }
 
-  .footer-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8mm;
-    padding: 0 2mm;
-  }
+      /* Footer row */
+      .footer-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8mm;
+        padding: 0 2mm;
+      }
 
-  .date {
-    text-align: right;
-    margin-bottom: 8mm;
-    font-size: 12pt;
-  }
+      /* Body blocks */
+      .date {
+        text-align: right;
+        margin-bottom: 8mm;
+        font-size: 14pt;
+      }
 
-  .to-block {
-    margin-bottom: 6mm;
-    line-height: 1.6;
-    font-size: 12pt;
-  }
+      .to-block {
+        margin-bottom: 6mm;
+        line-height: 1.6;
+        font-size: 14pt;
+      }
 
-  .subject {
-    text-align: center;
-    font-weight: 700;
-    margin: 6mm 0;
-    font-size: 12pt;
-  }
+      .subject {
+        text-align: center;
+        font-weight: 700;
+        margin: 6mm 0;
+        font-size: 15pt;
+        font-weight: bold;
+        text-decoration: underline;
+      }
 
-  .body {
-    font-size: 12pt;
-    line-height: 1.7;
-    text-align: justify;
-    white-space: pre-wrap;
-  }
+      .body {
+        font-size: 14pt;
+        line-height: 1.7;
+        text-align: justify;
+        white-space: pre-wrap;
+      }
 
-  .signature {
-    margin-top: 14mm;
-    display: flex;
-    justify-content: flex-end;
-  }
+      .signature {
+        margin-top: 14mm;
+        display: flex;
+        justify-content: flex-end;
+      }
 
-  .signature div {
-    line-height: 1.8;
-    font-size: 12pt;
-    min-width: 55mm;
-  }
-</style>
-</head>
+      .signature div {
+        line-height: 1.8;
+        font-size: 14pt;
+        min-width: 55mm;
+      }
+    </style>
+  </head>
 
-<body>
-<div class="page">
+  <body>
+    <div class="watermark">
+      <img src="{{LOGO_PATH}}" alt="" />
+    </div>
 
-  <div class="watermark">
-    <img src="{{LOGO_PATH}}" alt="" />
-  </div>
+    <header>
+      <div class="top-row">
+        <div class="brand">
+          <img class="logo" src="{{LOGO_PATH}}" alt="" />
+          <div class="name">
+            MASINA DIGITECH<br />
+            SOLUTIONS PVT. LTD.
+          </div>
+        </div>
 
-  <div class="header">
-    <div class="top-row">
-      <div class="brand">
-        <img class="logo" src="{{LOGO_PATH}}" alt="" />
-        <div class="name">
-          MASINA DIGITECH<br/>
-          SOLUTIONS PVT. LTD.
+        <div class="contacts" style="font-size: 12pt">
+          +977 9767979999<br />
+          masina.digitech@gmail.com<br />
+          Koteshwor, Kathmandu
         </div>
       </div>
 
-      <div class="contacts">
-        +977 9767979999<br/>
-        +977 9761888888<br/>
-        masina.digitech@gmail.com<br/>
-        Koteshwor, Kathmandu
+      <div class="divider">
+        <div class="red"></div>
+        <div class="blue"></div>
       </div>
-    </div>
+    </header>
 
-    <div class="divider">
-      <div class="red"></div>
-      <div class="blue"></div>
-    </div>
-  </div>
-
-  <div class="footer">
-    <div class="footer-divider">
-      <div class="red"></div>
-      <div class="blue"></div>
-    </div>
-
-    <div class="footer-row">
-      <div>+977 9767979999</div>
-      <div>Koteshwor, Kathmandu</div>
-      <div>masina.digitech@gmail.com</div>
-    </div>
-  </div>
-
-  <div class="content">
-    <div class="date">{{DATE_LABEL}} {{DATE}}</div>
-
-    <div class="to-block">
-      {{SALUTATION}} {{RECIPIENT}} ज्यू,<br/>
-      {{ORG}}<br/>
-      {{ADDRESS}}
-    </div>
-
-    <div class="subject">{{SUBJECT_LABEL}} {{SUBJECT}}</div>
-
-    <div class="body">{{BODY_TEXT}}</div>
-
-    <div class="signature">
-      <div>
-        {{SIGN_NAME}}<br/>
-        {{SIGN_TITLE}}
+    <footer>
+      <div class="footer-divider">
+        <div class="red"></div>
+        <div class="blue"></div>
       </div>
-    </div>
-  </div>
 
-</div>
+      <div class="footer-row">
+        <div>+977 9767979999</div>
+        <div>Koteshwor, Kathmandu</div>
+        <div>masina.digitech@gmail.com</div>
+      </div>
+    </footer>
 
-<!-- Auto-shrink body text to keep within one page area -->
-<script>
-  (function () {
-    const contentEl = document.querySelector(".content");
-    const bodyEl = document.querySelector(".body");
-    if (!contentEl || !bodyEl) return;
+    <main>
+      <div class="date">{{DATE_LABEL}} {{DATE}}</div>
 
-    let size = 12;
-    const min = 8;
+      <div class="to-block">
+        {{SALUTATION}} {{RECIPIENT}},<br />
+        {{ORG}}<br />
+        {{ADDRESS}}
+      </div>
 
-    while (contentEl.scrollHeight > contentEl.clientHeight && size > min) {
-      size -= 0.5;
-      bodyEl.style.fontSize = size + "pt";
-    }
-  })();
-</script>
+      <div class="subject">{{SUBJECT_LABEL}} {{SUBJECT}}</div>
 
-</body>
+      <div class="body" id="bodyText">{{BODY_TEXT}}</div>
+
+      <div class="signature">
+        <div>
+          {{SIGN_NAME}}<br />
+          {{SIGN_TITLE}}
+        </div>
+      </div>
+    </main>
+
+    <script>
+      // Shrink body text if it overflows the single page content area
+      (function () {
+        const bodyEl = document.getElementById("bodyText");
+        if (!bodyEl) return;
+
+        let size = 12;
+        const min = 8;
+
+        // Main printable height is limited; if content overflows, shrink
+        while (
+          document.documentElement.scrollHeight >
+            document.documentElement.clientHeight &&
+          size > min
+        ) {
+          size -= 0.5;
+          bodyEl.style.fontSize = size + "pt";
+        }
+      })();
+    </script>
+  </body>
 </html>

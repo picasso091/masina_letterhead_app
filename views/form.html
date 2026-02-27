@@ -4,7 +4,21 @@
     <meta charset="utf-8" />
     <title>Masina Notice Generator</title>
 
+    <!-- Material Symbols calendar icon -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=calendar_month"
+    />
     <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          "FILL" 0,
+          "wght" 400,
+          "GRAD" 0,
+          "opsz" 24;
+        vertical-align: middle;
+      }
+
       body {
         font-family: Arial;
         padding: 40px;
@@ -13,49 +27,52 @@
       form {
         background: white;
         padding: 26px;
-        max-width: 820px;
+        max-width: 920px;
         margin: auto;
-        border-radius: 10px;
-        box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
       }
+
       input,
       textarea,
       select {
         width: 100%;
-        padding: 10px;
+        padding: 10px 14px;
         margin: 8px 0 16px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
+        border-radius: 8px;
+        border: 1px solid #cfcfcf;
         box-sizing: border-box;
-        font-size: 14px;
+        font-size: 16px;
+        background: #fff;
       }
       textarea {
         resize: vertical;
       }
       button {
         padding: 12px 18px;
-        background: #24308a;
+        background: #235eff;
         color: white;
         border: none;
         cursor: pointer;
         font-size: 16px;
-        border-radius: 8px;
+        border-radius: 10px;
       }
       button:hover {
-        background: #e00000;
+        background: #24308a;
       }
       label {
-        font-weight: 600;
+        font-weight: 700;
         display: block;
         margin-top: 6px;
+        font-size: 14px;
       }
       .row {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 16px;
+        gap: 18px;
       }
       .hint {
-        font-size: 12px;
+        font-size: 13px;
         color: #666;
         margin-top: -10px;
         margin-bottom: 12px;
@@ -63,259 +80,135 @@
       .hidden {
         display: none;
       }
-      .date-field {
+
+      /* Date wrapper + consistent icon */
+      .date-wrapper {
         position: relative;
+        width: 100%;
+        cursor: pointer;
+      }
+      .date-wrapper input {
+        height: 48px;
+        padding: 0 52px 0 14px;
+        line-height: 48px;
+        cursor: pointer;
       }
 
-      .date-field input {
-        padding-right: 44px; /* space for icon */
-      }
-
-      .calendar-btn {
+      /* Hide native AD icon but keep native picker working */
+      input[type="date"]::-webkit-calendar-picker-indicator {
+        opacity: 0;
         position: absolute;
-        right: 10px;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+      }
+
+      .calendar-icon {
+        position: absolute;
+        right: 12px;
         top: 50%;
-        transform: translateY(-50%);
-        width: 34px;
-        height: 34px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        background: #fff;
+        /* Optical correction for Material font glyph box */
+        transform: translateY(calc(-50% + 1px));
+        font-size: 24px;
+        line-height: 1;
+        color: #666;
+        pointer-events: auto; /* clickable */
         cursor: pointer;
-        display: grid;
-        place-items: center;
+        user-select: none;
       }
 
-      .calendar-btn:hover {
-        border-color: #999;
+      /* Make hover feel consistent */
+      .date-wrapper:hover .calendar-icon {
+        color: #444;
       }
-
-      .calendar-btn svg {
-        width: 18px;
-        height: 18px;
-      }
-      /* Make BS input visually identical to native date input */
-
-      .bs-date-input {
-        background-image: url("data:image/svg+xml;utf8,\<svg xmlns='http://www.w3.org/2000/svg' fill='none' stroke='%23666' stroke-width='2' viewBox='0 0 24 24'>\<rect x='3' y='4' width='18' height='18' rx='2' ry='2'></rect>\<line x1='16' y1='2' x2='16' y2='6'></line>\<line x1='8' y1='2' x2='8' y2='6'></line>\<line x1='3' y1='10' x2='21' y2='10'></line>\</svg>");
-        background-repeat: no-repeat;
-        background-position: right 12px center;
-        background-size: 18px;
-        padding-right: 40px; /* space for icon */
-        cursor: pointer;
-      }
-      /* Wrapper */
-.date-wrapper {
-  position: relative;
-}
-
-/* Inputs */
-.date-wrapper input {
-  width: 100%;
-  padding-right: 44px;
-}
-
-/* Remove native Chrome calendar icon */
-input[type="date"]::-webkit-calendar-picker-indicator {
-  opacity: 0;
-  position: absolute;
-  right: 0;
-  width: 100%;
-  cursor: pointer;
-}
-
-/* Custom Material Icon */
-.calendar-icon {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #666;
-  pointer-events: none;
-  font-size: 22px;
-}
-/* Make BS input behave like clickable date picker */
-#bsDate {
-  cursor: pointer;
-}
-
-/* Also change cursor when hovering icon */
-.date-wrapper .calendar-icon {
-  cursor: pointer;
-}
-
-/* Optional: change entire wrapper hover */
-.date-wrapper:hover input {
-  cursor: pointer;
-}
-.date-wrapper {
-  position: relative;
-  cursor: pointer;
-}
-
-.date-wrapper input {
-  width: 100%;
-  padding-right: 44px;
-  cursor: pointer;
-}
-
-.calendar-icon {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #666;
-  font-size: 22px;
-  pointer-events: auto;
-  cursor: pointer;
-}
-/* wrapper stays same */
-.date-wrapper { position: relative; width: 100%; }
-
-/* inputs same height */
-.date-wrapper input{
-  width:100%;
-  height:48px;
-  padding:0 44px 0 14px;
-  box-sizing:border-box;
-  font-size:16px;
-  line-height:48px;
-}
-
-/* hide native AD icon */
-input[type="date"]::-webkit-calendar-picker-indicator{
-  opacity:0;
-  position:absolute;
-  right:0;
-  width:100%;
-  cursor:pointer;
-}
-
-/* ✅ Material icon true centering */
-.calendar-icon{
-  position:absolute;
-  right:12px;
-  top:50%;
-  transform:translateY(-50%);
-  font-size:24px;
-  line-height:1;          /* IMPORTANT: remove font baseline extra */
-  display:block;
-  color:#666;
-  pointer-events:none;
-}
-
-/* ✅ tiny optical correction (tune if needed) */
-.calendar-icon{
-  transform: translateY(calc(-50% + 1px));
-}
-.material-symbols-outlined{
-  vertical-align: middle;
-}
     </style>
 
-    <!-- ✅ Nepali Date Picker CSS (local from node_modules dist, README path) -->
+    <!-- Nepali Date Picker CSS (local from node_modules/dist) -->
     <link
       rel="stylesheet"
-      href="/vendor/nepali-date-picker/nepali.datepicker.v5.0.6.min.css"
+      href="/vendor/nepali-date-picker/nepali.datepicker.v{{NDP_VERSION}}.min.css"
     />
   </head>
-  <link rel="stylesheet"
-  href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=calendar_month" />
-
-<style>
-.material-symbols-outlined {
-  font-variation-settings:
-    'FILL' 0,
-    'wght' 400,
-    'GRAD' 0,
-    'opsz' 24;
-}
-</style>
 
   <body>
-    <h2>Masina Digitech Notice Generator</h2>
+    <h2 id="pageTitle">Masina Digitech Notice Generator</h2>
 
     <form action="/generate" method="POST" id="noticeForm">
       <div class="row">
         <div>
-          <label>Language</label>
+          <label id="labelLanguage">Language</label>
           <select name="language" id="languageSelect" required>
-            <option value="nepali">Nepali</option>
-            <option value="english">English</option>
+            <option value="english" id="optLangEnglish">English</option>
+            <option value="nepali" id="optLangNepali">Nepali</option>
           </select>
         </div>
 
         <div>
-          <label>Date Type</label>
+          <label id="labelDateType">Date Type</label>
           <select name="dateType" id="dateTypeSelect" required>
-            <option value="bs">Nepali (BS)</option>
-            <option value="ad">English (AD)</option>
+            <option value="ad" id="optDateTypeAD">English (AD)</option>
+            <option value="bs" id="optDateTypeBS">Nepali (BS)</option>
           </select>
         </div>
       </div>
 
       <!-- AD Date Picker -->
       <div id="adPickerWrap">
-  <label>Date (AD)</label>
-
-  <div class="date-wrapper">
-    <input type="date" id="adDate" value="{{TODAY_AD_INPUT}}" />
-    <span class="calendar-icon material-symbols-outlined">
-      calendar_month
-    </span>
-  </div>
-</div>
+        <label id="labelDateAD">Date (AD)</label>
+        <div class="date-wrapper" id="adWrapper">
+          <input type="date" id="adDate" value="{{TODAY_AD_INPUT}}" />
+          <span class="calendar-icon material-symbols-outlined" id="adIcon"
+            >calendar_month</span
+          >
+        </div>
+      </div>
 
       <!-- BS Date Picker -->
-     <div id="bsPickerWrap" class="hidden">
-  <label>Date (BS)</label>
+      <div id="bsPickerWrap" class="hidden">
+        <label id="labelDateBS">Date (BS)</label>
+        <div class="date-wrapper" id="bsWrapper">
+          <input type="text" id="bsDate" readonly placeholder="YYYY/MM/DD" />
+          <span class="calendar-icon material-symbols-outlined" id="bsIcon"
+            >calendar_month</span
+          >
+        </div>
+        <!-- <div class="hint" id="hintBs">Click the field or the icon to open Nepali calendar.</div> -->
+      </div>
 
-  <div class="date-wrapper">
-    <input type="text" id="bsDate" readonly />
-    <span class="calendar-icon material-symbols-outlined">
-      calendar_month
-    </span>
-  </div>
-
-</div>
-
-      <!-- ✅ Server reads this -->
+      <!-- Server reads this -->
       <input type="hidden" name="date" id="finalDate" value="" />
 
-      <label>Recipient</label>
-      <input type="text" name="recipient" required />
+      <label id="labelRecipient">Recipient</label>
+      <input type="text" name="recipient" id="recipientInput" required />
 
-      <label>Organization</label>
-      <input type="text" name="org" required />
+      <label id="labelOrganization">Organization</label>
+      <input type="text" name="org" id="orgInput" required />
 
-      <label>Address</label>
-      <input type="text" name="address" required />
+      <label id="labelAddress">Address</label>
+      <input type="text" name="address" id="addressInput" required />
 
-      <label>Subject</label>
-      <input type="text" name="subject" required />
+      <label id="labelSubject">Subject</label>
+      <input type="text" name="subject" id="subjectInput" required />
 
-      <label>Body</label>
-      <textarea name="body" rows="10" required></textarea>
+      <label id="labelBody">Body</label>
+      <textarea name="body" id="bodyInput" rows="10" required></textarea>
 
-      <label>Sign Name</label>
-      <input type="text" name="signname" required />
+      <label id="labelSignName">Sign Name</label>
+      <input type="text" name="signname" id="signNameInput" required />
 
-      <label>Sign Title</label>
-      <input type="text" name="signtitle" required />
+      <label id="labelSignTitle">Sign Title</label>
+      <input type="text" name="signtitle" id="signTitleInput" required />
 
-      <button type="submit">Generate PDF</button>
+      <button type="submit" id="btnGenerate">Generate PDF</button>
     </form>
 
-    <!-- ✅ Nepali Date Picker JS (local from node_modules dist, README path) -->
-    <script
-      src="/vendor/nepali-date-picker/v5/nepali.datepicker/js/nepali.datepicker.v{{NDP_VERSION}}.min.js"
-      type="text/javascript"
-    ></script>
+    <!-- Nepali Date Picker JS (local from node_modules/dist) -->
+    <script src="/vendor/nepali-date-picker/nepali.datepicker.v{{NDP_VERSION}}.min.js"></script>
 
     <script>
       const languageSelect = document.getElementById("languageSelect");
       const dateTypeSelect = document.getElementById("dateTypeSelect");
-
       const adWrap = document.getElementById("adPickerWrap");
       const bsWrap = document.getElementById("bsPickerWrap");
 
@@ -323,19 +216,106 @@ input[type="date"]::-webkit-calendar-picker-indicator{
       const bsDate = document.getElementById("bsDate");
       const finalDate = document.getElementById("finalDate");
 
-      const bsCalendarBtn = document.getElementById("bsCalendarBtn");
-
-      // Open picker when icon clicked
-      if (bsCalendarBtn) {
-        bsCalendarBtn.addEventListener("click", () => {
-          bsDate.focus(); // picker opens on focus
-          bsDate.click(); // some builds open on click
-        });
-      }
+      const adIcon = document.getElementById("adIcon");
+      const bsIcon = document.getElementById("bsIcon");
 
       const pad2 = (n) => String(n).padStart(2, "0");
 
+      // ===== Translations =====
+      const T = {
+        english: {
+          pageTitle: "Masina Digitech Letterhead Generator",
+          language: "Language",
+          dateType: "Date Type",
+          dateAD: "Date (AD)",
+          dateBS: "Date (BS)",
+          recipient: "Recipient",
+          organization: "Organization",
+          address: "Address",
+          subject: "Subject",
+          body: "Body",
+          signName: "Sign Name",
+          signTitle: "Designation",
+          // autoSwitch: "Auto-switches based on Language.",
+          // bsHint: "Click the field or the icon to open Nepali calendar.",
+          btn: "Generate PDF",
+          optLangEnglish: "English",
+          optLangNepali: "Nepali",
+          optDateTypeAD: "English (AD)",
+          optDateTypeBS: "Nepali (BS)",
+        },
+        nepali: {
+          pageTitle: "Masina Digitech Letterhead Generator",
+          language: "भाषा",
+          dateType: "मिति प्रकार",
+          dateAD: "मिति (इ.स.)",
+          dateBS: "मिति (वि.स.)",
+          recipient: "प्राप्तकर्ता",
+          organization: "संस्था",
+          address: "ठेगाना",
+          subject: "विषय",
+          body: "व्यहोरा",
+          signName: "हस्ताक्षर नाम",
+          signTitle: "पद",
+          // autoSwitch: "भाषाअनुसार स्वतः परिवर्तन हुन्छ।",
+          // bsHint: "मिति छान्न फिल्ड वा आइकन क्लिक गर्नुहोस्।",
+          btn: "PDF बनाउनुहोस्",
+          optLangEnglish: "अंग्रेजी",
+          optLangNepali: "नेपाली",
+          optDateTypeAD: "इ.स. (AD)",
+          optDateTypeBS: "वि.स. (BS)",
+        },
+      };
+
+      function toNepaliDigits(str) {
+        const map = {
+          0: "०",
+          1: "१",
+          2: "२",
+          3: "३",
+          4: "४",
+          5: "५",
+          6: "६",
+          7: "७",
+          8: "८",
+          9: "९",
+        };
+        return String(str).replace(/[0-9]/g, (d) => map[d]);
+      }
+
+      function setText(id, text) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
+      }
+
+      function updateLabels(lang) {
+        const t = T[lang];
+
+        setText("pageTitle", t.pageTitle);
+        setText("labelLanguage", t.language);
+        setText("labelDateType", t.dateType);
+        setText("labelDateAD", t.dateAD);
+        setText("labelDateBS", t.dateBS);
+        setText("labelRecipient", t.recipient);
+        setText("labelOrganization", t.organization);
+        setText("labelAddress", t.address);
+        setText("labelSubject", t.subject);
+        setText("labelBody", t.body);
+        setText("labelSignName", t.signName);
+        setText("labelSignTitle", t.signTitle);
+        // setText("hintAutoSwitch", t.autoSwitch);
+        // setText("hintBs", t.bsHint);
+        setText("btnGenerate", t.btn);
+
+        setText("optLangEnglish", t.optLangEnglish);
+        setText("optLangNepali", t.optLangNepali);
+        setText("optDateTypeAD", t.optDateTypeAD);
+        setText("optDateTypeBS", t.optDateTypeBS);
+      }
+
+      // ===== Date helpers =====
       function adInputToPdf(adValue) {
+        // yyyy-mm-dd -> yyyy/mm/dd
         const [y, m, d] = adValue.split("-");
         return `${y}/${m}/${d}`;
       }
@@ -345,43 +325,54 @@ input[type="date"]::-webkit-calendar-picker-indicator{
       }
 
       function setFinalBS() {
-        finalDate.value = bsDate.value || "";
+        const val = bsDate.value || "";
+        if (!val) {
+          finalDate.value = "";
+          return;
+        }
+
+        // If Nepali language selected, convert digits to Nepali numerals
+        if (languageSelect.value === "nepali") {
+          finalDate.value = toNepaliDigits(val);
+        } else {
+          finalDate.value = val;
+        }
       }
 
+      // ===== Nepali picker init =====
       let bsPickerInited = false;
-
       function initBsPicker() {
         if (bsPickerInited) return;
 
         if (typeof bsDate.NepaliDatePicker !== "function") {
-          console.error("NepaliDatePicker function not found. JS not loaded.");
+          console.error("NepaliDatePicker not found. Check JS load.");
           return;
         }
 
-        // Initialize picker
         bsDate.NepaliDatePicker({
           dateFormat: "YYYY/MM/DD",
           closeOnDateSelect: true,
-          onSelect: function () {
-            // bsDate.value will be filled by picker
-            document.getElementById("finalDate").value = bsDate.value;
-          },
         });
 
-        // Set default BS = today's BS
+        // Default to today's BS using NepaliFunctions.AD2BS
         const now = new Date();
-        if (window.NepaliFunctions && window.NepaliFunctions.AD2BS) {
+        if (
+          window.NepaliFunctions &&
+          typeof window.NepaliFunctions.AD2BS === "function"
+        ) {
           const bs = window.NepaliFunctions.AD2BS({
             year: now.getFullYear(),
             month: now.getMonth() + 1,
             day: now.getDate(),
           });
-          bsDate.value = `${bs.year}/${String(bs.month).padStart(2, "0")}/${String(bs.day).padStart(2, "0")}`;
-          document.getElementById("finalDate").value = bsDate.value;
+          bsDate.value = `${bs.year}/${pad2(bs.month)}/${pad2(bs.day)}`;
         }
 
+        setFinalBS();
         bsPickerInited = true;
       }
+
+      // ===== UI toggles =====
       function showAD() {
         adWrap.classList.remove("hidden");
         bsWrap.classList.add("hidden");
@@ -391,8 +382,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{
       function showBS() {
         bsWrap.classList.remove("hidden");
         adWrap.classList.add("hidden");
-
-        // Ensure init happens after it becomes visible
+        // init after showing
         setTimeout(() => {
           initBsPicker();
           setFinalBS();
@@ -407,9 +397,25 @@ input[type="date"]::-webkit-calendar-picker-indicator{
           dateTypeSelect.value = "bs";
           showBS();
         }
+
+        updateLabels(languageSelect.value);
+        if (dateTypeSelect.value === "bs") setFinalBS();
+        else setFinalAD();
       }
 
-      // Events
+      // ===== Icon click behavior =====
+      function hookIconClicks() {
+        adIcon.addEventListener("click", () => {
+          adDate.focus();
+          adDate.click();
+        });
+        bsIcon.addEventListener("click", () => {
+          bsDate.focus();
+          bsDate.click();
+        });
+      }
+
+      // ===== Listeners =====
       languageSelect.addEventListener("change", syncFromLanguage);
 
       dateTypeSelect.addEventListener("change", () => {
@@ -427,15 +433,20 @@ input[type="date"]::-webkit-calendar-picker-indicator{
 
         if (!finalDate.value) {
           e.preventDefault();
-          alert("Please select a date.");
+          alert(
+            languageSelect.value === "nepali"
+              ? "कृपया मिति छान्नुहोस्।"
+              : "Please select a date.",
+          );
         }
       });
 
-      // Default: Nepali mode (BS)
       window.onload = function () {
+        hookIconClicks();
+        // Default language: English (change to 'nepali' if you want)
+        languageSelect.value = "english";
         syncFromLanguage();
       };
     </script>
-    <script src="/vendor/nepali-date-picker/nepali.datepicker.v5.0.6.min.js"></script>
   </body>
 </html>
