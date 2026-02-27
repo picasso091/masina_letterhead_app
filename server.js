@@ -14,6 +14,25 @@ app.use(express.urlencoded({ extended: true }));
 // Serve logo + fonts
 app.use("/assets", express.static(path.join(__dirname, "assets")));
 
+let browserPromise = null;
+
+async function getBrowser() {
+  if (!browserPromise) {
+    browserPromise = puppeteer.launch({
+      headless: "new",
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage", // IMPORTANT on containers
+        "--disable-gpu",
+        "--no-zygote",
+        "--single-process",
+      ],
+    });
+  }
+  return browserPromise;
+}
+
 // Serve nepali datepicker dist
 const ndpDistPath = path.join(
   __dirname,
@@ -95,56 +114,46 @@ app.post("/generate", async (req, res) => {
 
   const html = template.replace(/{{(\w+)}}/g, (_, key) => data[key] || "");
 
-  const browser = await puppeteer.launch({
-    headless: "new",
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  });
+  const browser = await getBrowser();
 
   try {
-    // before: const page = await browser.newPage();
     const page = await browser.newPage();
 
-    // Force a stable A4-ish viewport so Puppeteer doesn't "reflow" differently
-    await page.setViewport({ width: 794, height: 1123, deviceScaleFactor: 1 }); // ~A4 @96dpi
+    await page.setViewport({ width: 794, height: 1123, deviceScaleFactor: 1 });
+
+    // If render is slow, avoid hanging forever
+    page.setDefaultTimeout(60000);
 
     await page.setContent(html, { waitUntil: "domcontentloaded" });
 
-    // Wait for images to load (keep your existing block)
-    await page.evaluate(async () => {
-      const imgs = Array.from(document.images);
-      await Promise.all(
-        imgs.map((img) =>
-          img.complete
-            ? Promise.resolve()
-            : new Promise((resolve, reject) => {
-                img.addEventListener("load", resolve);
-                img.addEventListener("error", reject);
-              }),
-        ),
-      );
-    });
-
     const pdfBytes = await page.pdf({
-      format: "A4",
+      width: "210mm",
+      height: "297mm",
       printBackground: true,
-      preferCSSPageSize: true,
       margin: { top: "0mm", right: "0mm", bottom: "0mm", left: "0mm" },
     });
 
-    const pdfBuffer = Buffer.from(pdfBytes);
+    await page.close();
 
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", 'attachment; filename="notice.pdf"');
-    res.setHeader("Content-Length", pdfBuffer.length);
-    return res.end(pdfBuffer);
+    return res.end(Buffer.from(pdfBytes));
   } catch (err) {
-    console.error(err);
-    return res.status(500).send("PDF generation failed. Check terminal logs.");
-  } finally {
-    await browser.close();
+    console.error("PDF error:", err);
+    return res.status(500).send("PDF generation failed (see server logs).");
   }
 });
 
 app.listen(3000, "0.0.0.0", () => {
   console.log(`🚀 Server running on port 3000`);
+});
+
+process.on("SIGTERM", async () => {
+  try {
+    const b = await browserPromise;
+    if (b) await b.close();
+  } catch (err) {
+    console.error("Error closing browser:", err);
+  }
+  process.exit(0);
 });
