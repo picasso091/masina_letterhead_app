@@ -7,8 +7,9 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "@sajanm/nepali-date-picker": "^5.0.6",
-    "express": "^4.19.2",
-    "puppeteer": "^24.0.0"
-  }
+  "@sajanm/nepali-date-picker": "^5.0.6",
+  "express": "^4.19.2",
+  "puppeteer-core": "^23.0.0",
+  "@sparticuz/chromium": "^123.0.0"
+}
 }

@@ -1,7 +1,8 @@
 import express from "express";
 import fs from "fs";
 import path from "path";
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
+import chromium from "@sparticuz/chromium";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -11,19 +12,25 @@ const app = express();
 app.set("trust proxy", 1);
 app.use(express.urlencoded({ extended: true }));
 
-// Serve logo + fonts
 app.use("/assets", express.static(path.join(__dirname, "assets")));
 
 let browserPromise = null;
 
 async function getBrowser() {
   if (!browserPromise) {
+    const executablePath = await chromium.executablePath();
+
+    console.log("Chromium path:", executablePath);
+
     browserPromise = puppeteer.launch({
-      headless: "new",
+      executablePath,
+      headless: chromium.headless,
+      defaultViewport: chromium.defaultViewport,
       args: [
+        ...chromium.args,
         "--no-sandbox",
         "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage", // IMPORTANT on containers
+        "--disable-dev-shm-usage",
         "--disable-gpu",
         "--no-zygote",
         "--single-process",
@@ -33,10 +40,10 @@ async function getBrowser() {
   return browserPromise;
 }
 
-// Serve nepali datepicker dist
+// Nepali date picker dist
 const ndpDistPath = path.join(
   __dirname,
-  "node_modules/@sajanm/nepali-date-picker/dist",
+  "node_modules/@sajanm/nepali-date-picker/dist"
 );
 app.use("/vendor/nepali-date-picker", express.static(ndpDistPath));
 
@@ -45,7 +52,7 @@ function pad2(n) {
 }
 function todayADInput() {
   const d = new Date();
-  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; // yyyy-mm-dd
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 }
 function escapeHtml(s = "") {
   return s
@@ -59,10 +66,10 @@ function escapeHtml(s = "") {
 function getNdpVersion() {
   const pkgPath = path.join(
     __dirname,
-    "node_modules/@sajanm/nepali-date-picker/package.json",
+    "node_modules/@sajanm/nepali-date-picker/package.json"
   );
   const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
-  return pkg.version; // "5.0.6"
+  return pkg.version;
 }
 
 // Form page
@@ -85,7 +92,6 @@ app.post("/generate", async (req, res) => {
   const templatePath = path.join(__dirname, "views/template.html");
   const template = fs.readFileSync(templatePath, "utf8");
 
-  // const base = "http://127.0.0.1:3000";
   const base = `${req.protocol}://${req.get("host")}`;
   const language = req.body.language || "nepali";
 
@@ -114,14 +120,16 @@ app.post("/generate", async (req, res) => {
 
   const html = template.replace(/{{(\w+)}}/g, (_, key) => data[key] || "");
 
-  const browser = await getBrowser();
-
   try {
+    const browser = await getBrowser();
     const page = await browser.newPage();
 
-    await page.setViewport({ width: 794, height: 1123, deviceScaleFactor: 1 });
+    await page.setViewport({
+      width: 794,
+      height: 1123,
+      deviceScaleFactor: 1,
+    });
 
-    // If render is slow, avoid hanging forever
     page.setDefaultTimeout(60000);
 
     await page.setContent(html, { waitUntil: "domcontentloaded" });
@@ -136,7 +144,10 @@ app.post("/generate", async (req, res) => {
     await page.close();
 
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", 'attachment; filename="notice.pdf"');
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="notice.pdf"'
+    );
     return res.end(Buffer.from(pdfBytes));
   } catch (err) {
     console.error("PDF error:", err);
@@ -145,7 +156,7 @@ app.post("/generate", async (req, res) => {
 });
 
 app.listen(3000, "0.0.0.0", () => {
-  console.log(`🚀 Server running on port 3000`);
+  console.log("🚀 Server running on port 3000");
 });
 
 process.on("SIGTERM", async () => {
