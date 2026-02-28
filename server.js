@@ -43,7 +43,7 @@ async function getBrowser() {
 // Nepali date picker dist
 const ndpDistPath = path.join(
   __dirname,
-  "node_modules/@sajanm/nepali-date-picker/dist"
+  "node_modules/@sajanm/nepali-date-picker/dist",
 );
 app.use("/vendor/nepali-date-picker", express.static(ndpDistPath));
 
@@ -66,7 +66,7 @@ function escapeHtml(s = "") {
 function getNdpVersion() {
   const pkgPath = path.join(
     __dirname,
-    "node_modules/@sajanm/nepali-date-picker/package.json"
+    "node_modules/@sajanm/nepali-date-picker/package.json",
   );
   const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
   return pkg.version;
@@ -144,10 +144,9 @@ app.post("/generate", async (req, res) => {
     await page.close();
 
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      'attachment; filename="notice.pdf"'
-    );
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const filename = `masina_letterhead_${timestamp}.pdf`;
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
     return res.end(Buffer.from(pdfBytes));
   } catch (err) {
     console.error("PDF error:", err);
